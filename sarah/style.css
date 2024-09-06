@@ -1,0 +1,16 @@
+body{
+    background-color:purple;
+    
+}
+.mbogo{
+    background-color: blue;
+    padding: 15px;
+    margin: 30px;
+    height: 11em;
+    width: 10em;
+    color: yellow;
+}
+.main{
+    color: blueviolet;
+    font-size: 3em;
+}

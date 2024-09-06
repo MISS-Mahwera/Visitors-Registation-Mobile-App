@@ -1,0 +1,60 @@
+
+
+.main{
+    box-shadow: 1px 1px 3px 2px rgba(0,0, 0, 0.14);
+    
+}
+.container {
+    width: 40%;
+    height: 100%;
+}
+.header{
+    text-align: center;
+    padding: 2em;
+}
+body{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+}
+.field{
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}
+.copy {
+    text-align: center;
+}
+.field input{
+     padding-left: 1em;
+     padding-top: 0.4em;
+     padding-bottom: 0.4em;
+     border-radius: 8px;
+}
+.footer button {
+    background-color: orange;
+}
+.checkbox {
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+.extra{
+    padding: 1em;
+    text-align: center;
+}
+button{
+    border: none;
+    width: 100%;
+    padding-top: 0.7em;
+    padding-bottom: 0.7em;
+    border-radius: 6px;
+    color: white;
+}
+.extra button{
+       background-color: blue;
+}
+.extra span{
+   
+    font-weight: 0.5;
+}
