@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:projects/homepage.dart';
 
+import '../home/homepage.dart';
+
 void main() {
   runApp(MeetingApp());
 }
@@ -87,9 +89,6 @@ class Meeting {
   final List<String> participants;
 
   Meeting({required this.name, required this.date, required this.participants});
-}
-class Participant {
-
 }
 
 class MeetingListPage extends StatefulWidget {

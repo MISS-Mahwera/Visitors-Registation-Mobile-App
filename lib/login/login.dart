@@ -1,9 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:projects/login/sign_up.dart';
 
-import '../homepage.dart';
-import '../sign_up.dart';
 import 'meeting.dart';
+
+// import '../../homepage.dart';
+// import '../sign_up.dart';
+// import 'meeting.dart';
 
 
 String _email = '';
@@ -121,7 +124,7 @@ class LoginPage extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => SignUpApp()),
+                                builder: (context) => SignUpPage()),
                           );
                         },
                         child: const Text(
