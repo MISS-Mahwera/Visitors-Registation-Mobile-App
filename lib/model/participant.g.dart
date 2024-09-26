@@ -19,19 +19,22 @@ class ParticipantAdapter extends TypeAdapter<Participant> {
     return Participant(
       name: fields[1] as String,
       phoneNumber: fields[2] as String,
+      fingerprint: fields[3] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, Participant obj) {
     writer
-      ..writeByte(3)
+      ..writeByte(4)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
       ..write(obj.name)
       ..writeByte(2)
-      ..write(obj.phoneNumber);
+      ..write(obj.phoneNumber)
+      ..writeByte(3)
+      ..write(obj.fingerprint);
   }
 
   @override
@@ -52,10 +55,12 @@ class ParticipantAdapter extends TypeAdapter<Participant> {
 Participant _$ParticipantFromJson(Map<String, dynamic> json) => Participant(
       name: json['name'] as String,
       phoneNumber: json['phoneNumber'] as String,
+      fingerprint: json['fingerprint'] as String? ?? '',
     );
 
 Map<String, dynamic> _$ParticipantToJson(Participant instance) =>
     <String, dynamic>{
       'name': instance.name,
       'phoneNumber': instance.phoneNumber,
+      'fingerprint': instance.fingerprint,
     };

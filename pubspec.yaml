@@ -30,12 +30,20 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+
+
   local_auth: ^2.1.6
   intl: ^0.18.0
   hive_flutter: ^1.1.0
   hive: ^2.2.3
   json_annotation: ^4.9.0
   uuid: ^3.0.6
+  usb_serial: ^0.5.2
+  fluttertoast: ^8.0.9
+  dio: ^5.3.3
+  internet_connection_checker: ^0.0.1+3
+
+
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -69,6 +77,18 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
+#  plugin:
+#    platforms:
+#      android:
+#        package: com.example.zkfinger10demo
+#        pluginClass: ZkFinger10Plugin
+
+  plugin:
+    platforms:
+      android:
+        package: com.example.zkfinger10demo
+        pluginClass: ZkFinger10Plugin
+
   assets:
     - assets/images.png
   #   - images/a_dot_ham.jpeg

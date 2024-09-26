@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:projects/homepage.dart';
 
+import '../finger_print/finger_print.dart';
 import '../home/homepage.dart';
 
 void main() {
@@ -28,7 +28,8 @@ class _MainPageState extends State<MainPage> {
 
   final List<Widget> _pages = [
     MeetingListPage(),
-    homepage(),
+    Homepage(),
+    MyAppState(),
     // AddMeetingPage(),
   ];
 
@@ -53,6 +54,10 @@ class _MainPageState extends State<MainPage> {
           BottomNavigationBarItem(
             icon: Icon(Icons.add),
             label: 'Add Meetings',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.people),
+            label: 'finger',
           ),
           // BottomNavigationBarItem(
           //   icon: Icon(Icons.add),
@@ -125,6 +130,7 @@ class _MeetingListPageState extends State<MeetingListPage> {
     ),
   ];
 
+
   @override
   Widget build(BuildContext context) {
     DateTime today = DateTime.now();
@@ -163,6 +169,7 @@ class _MeetingListPageState extends State<MeetingListPage> {
               SizedBox(height: 24),
               buildExpandableSection('Pending Meetings', Icons.pending_actions, pendingMeetings),
               SizedBox(height: 24),
+
               buildExpandableSection('Outdated Meetings', Icons.history, outdatedMeetings),
 
             ],

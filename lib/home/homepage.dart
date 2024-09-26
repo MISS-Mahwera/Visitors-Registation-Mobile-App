@@ -1,44 +1,64 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
-import 'package:projects/model/schedule_meeting.dart';
-
+import 'package:usb_serial/usb_serial.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import '../model/participant.dart';
-// 'model/participant.dart';
-class homepage extends StatefulWidget {
-  const homepage({super.key});
+import '../model/schedule_meeting.dart';
 
-  @override
-  State<homepage> createState() => _homepageState();
+class FingerprintService {
+  static const platform = MethodChannel('com.example.attendance/fingerprint');
+
+  static Future<String> captureFingerprint() async {
+    try {
+      final String result = await platform.invokeMethod('captureFingerprint');
+      return result; // This should be the fingerprint data
+    } on PlatformException catch (e) {
+      return "Failed to capture fingerprint: '${e.message}'."; // Handle errors
+    }
+  }
 }
 
+class Homepage extends StatefulWidget {
+  const Homepage({super.key});
 
-class _homepageState extends State<homepage> {
+  @override
+  State<Homepage> createState() => _HomepageState();
+}
+
+class _HomepageState extends State<Homepage> {
   final _formKey = GlobalKey<FormState>();
   String _companyName = '';
   String _region = '';
   DateTime _meetingDate = DateTime.now();
   int _daysTaken = 1;
-
-  // Declare the Hive box variable
   Box<ScheduleMeeting>? mySchedule;
 
-  // List to store Participant details
   List<Participant> _participants = [];
+  bool _isCapturingFingerprint = false;
+  String _captureStatus = ''; // To hold the status of the capture
 
   @override
   void initState() {
     super.initState();
-    // Open the Hive box in initState
     _openBox();
   }
 
-  // Method to open the Hive box
+  Future<void> checkUSBConnection() async {
+    List<UsbDevice> devices = await UsbSerial.listDevices();
+
+    if (devices.isNotEmpty) {
+      Fluttertoast.showToast(msg: 'USB device connected.');
+    } else {
+      Fluttertoast.showToast(msg: 'No devices connected.');
+    }
+  }
+
   Future<void> _openBox() async {
     mySchedule = await Hive.openBox<ScheduleMeeting>('my_schedule');
   }
 
-  // Method to select date
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -53,18 +73,61 @@ class _homepageState extends State<homepage> {
     }
   }
 
-  // Method to add a new participant
   void _addParticipant() {
     setState(() {
-      _participants.add(Participant(name: "", phoneNumber: ""));
+      _participants.add(Participant(name: "", phoneNumber: "", fingerprint: ""));
     });
   }
 
-  // Method to remove a participant
   void _removeParticipant(int index) {
     setState(() {
       _participants.removeAt(index);
     });
+  }
+
+  Future<void> _captureFingerprint(int index) async {
+    bool? confirmCapture = await _showConfirmationDialog();
+
+    if (confirmCapture == true) {
+      setState(() {
+        _isCapturingFingerprint = true; // Start loading
+        _captureStatus = ''; // Reset status
+      });
+
+      final String result = await FingerprintService.captureFingerprint();
+
+      setState(() {
+        _isCapturingFingerprint = false; // Stop loading
+        _participants[index].fingerprint = result; // Store captured fingerprint data
+        _captureStatus = result.contains("Failed") ? "Capture Failed" : "Capture Successful";
+      });
+    }
+  }
+
+  Future<bool?> _showConfirmationDialog() async {
+    return showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Capture Fingerprint"),
+          content: Text("Do you want to capture your fingerprint?"),
+          actions: [
+            TextButton(
+              child: Text("Cancel"),
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+            ),
+            TextButton(
+              child: Text("Capture"),
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -72,7 +135,13 @@ class _homepageState extends State<homepage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blue,
-       // title: Text("Schedule Meeting"),
+        title: Text("Schedule Meeting"),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.usb),
+            onPressed: checkUSBConnection,
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -90,8 +159,7 @@ class _homepageState extends State<homepage> {
                   children: [
                     Text(
                       'ADD NEW MEETING',
-                      style: TextStyle(
-                          fontSize: 30, fontWeight: FontWeight.bold),
+                      style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
                     ),
                     TextFormField(
                       decoration: InputDecoration(labelText: 'Company Name'),
@@ -134,8 +202,7 @@ class _homepageState extends State<homepage> {
                     ),
                     SizedBox(height: 16),
                     TextFormField(
-                      decoration: InputDecoration(
-                          labelText: 'Days Taken for Meeting'),
+                      decoration: InputDecoration(labelText: 'Days Taken for Meeting'),
                       keyboardType: TextInputType.number,
                       validator: (value) {
                         if (value!.isEmpty) {
@@ -150,14 +217,12 @@ class _homepageState extends State<homepage> {
                       },
                     ),
                     SizedBox(height: 20),
-                    // Participants Section
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
                           "Participants",
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                         ElevatedButton(
                           onPressed: _addParticipant,
@@ -178,8 +243,7 @@ class _homepageState extends State<homepage> {
                             child: Column(
                               children: [
                                 TextFormField(
-                                  decoration: InputDecoration(
-                                      labelText: 'Participant Name'),
+                                  decoration: InputDecoration(labelText: 'Participant Name'),
                                   validator: (value) {
                                     if (value!.isEmpty) {
                                       return 'Please enter the name';
@@ -192,8 +256,7 @@ class _homepageState extends State<homepage> {
                                 ),
                                 SizedBox(height: 8),
                                 TextFormField(
-                                  decoration: InputDecoration(
-                                      labelText: 'Phone Number'),
+                                  decoration: InputDecoration(labelText: 'Phone Number'),
                                   keyboardType: TextInputType.phone,
                                   validator: (value) {
                                     if (value!.isEmpty) {
@@ -204,6 +267,26 @@ class _homepageState extends State<homepage> {
                                   onSaved: (value) {
                                     _participants[index].phoneNumber = value!;
                                   },
+                                ),
+                                SizedBox(height: 8),
+                                ElevatedButton(
+                                  onPressed: () => _captureFingerprint(index),
+                                  child: _isCapturingFingerprint
+                                      ? CircularProgressIndicator()
+                                      : Text('Capture Fingerprint'),
+                                ),
+                                SizedBox(height: 8),
+                                Text(
+                                  _participants[index].fingerprint.isEmpty
+                                      ? 'No fingerprint captured'
+                                      : 'Fingerprint captured',
+
+                                ),
+                                Text(
+                                  _captureStatus, // Display capture status
+                                  style: TextStyle(
+                                    color: _captureStatus.contains("Failed") ? Colors.red : Colors.green,
+                                  ),
                                 ),
                                 SizedBox(height: 8),
                                 Align(
@@ -225,7 +308,6 @@ class _homepageState extends State<homepage> {
                         if (_formKey.currentState!.validate()) {
                           _formKey.currentState!.save();
 
-                          // Create the Schedule object
                           ScheduleMeeting schedule = ScheduleMeeting(
                             name: _companyName,
                             region: _region,
@@ -234,14 +316,12 @@ class _homepageState extends State<homepage> {
                             participant: _participants,
                           );
 
-                          // Ensure that the Hive box is opened
                           await mySchedule?.put(schedule.id, schedule);
 
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text('Registration Successful!')),
                           );
 
-                          // Handle form submission here
                           print('Schedule: ${schedule.name}, ${schedule.region}, ${schedule.date}, ${schedule.days}, ${schedule.participant}');
                         }
                       },
@@ -257,5 +337,3 @@ class _homepageState extends State<homepage> {
     );
   }
 }
-
-

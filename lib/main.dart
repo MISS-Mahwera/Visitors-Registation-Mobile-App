@@ -5,8 +5,6 @@ import 'package:projects/model/schedule_meeting.dart';
 
 
 // import 'homepage.dart';
-import 'authentication.dart';
-import 'login/List.dart';
 import 'login/login.dart';
 import 'login/meeting.dart';
 import 'login/sign_up.dart';
@@ -17,9 +15,6 @@ void main() {
   Hive.registerAdapter(ParticipantAdapter());
   runApp(const MyApp());
 }
-
-
-
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -33,7 +28,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: SignUpPage(),
+      home: LoginPage(),
 
     );
 
